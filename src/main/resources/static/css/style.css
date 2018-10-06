@@ -1,0 +1,19 @@
+.navbar * {
+    vertical-align: middle;
+}
+
+.navbar-brand {
+    margin-left: 20px;
+}
+
+#logo {
+    margin-right: 4px;
+}
+
+.nav-item {
+    vertical-align: middle;
+}
+
+.navbar-nav {
+    margin-right: 20px;
+}
