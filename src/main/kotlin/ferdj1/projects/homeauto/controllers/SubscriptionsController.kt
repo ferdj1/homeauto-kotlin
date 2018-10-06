@@ -5,9 +5,9 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 
 @Controller
-class IndexController {
-    @GetMapping("/")
-    fun getIndex(model: Model): String {
-        return "index"
+class SubscriptionsController {
+    @GetMapping("/subscriptions")
+    fun getSubscriptions(model: Model): String {
+        return "subscriptions"
     }
 }

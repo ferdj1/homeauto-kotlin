@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartHome - Error Page</title>
+
+    <th:block th:replace="fragments/headBootstrap"></th:block>
+</head>
+<body>
+    <div th:replace="fragments/header"></div>
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Something went wrong!</h4>
+        <!-- TODO: Insert custom error message here. -->
+        <p>Can't find the page.</p>
+
+        <a href="/" class="btn btn-primary">Go home</a>
+    </div>
+</body>
+</html>
