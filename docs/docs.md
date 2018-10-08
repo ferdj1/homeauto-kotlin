@@ -4,6 +4,8 @@
 Holds all the devices that have been connected to the system.
 Maps device ID to the device information. (id -> deviceDescription)
 
+**Currently redundant, will be used when new ID system is implemented**
+
 |Attribute|Description|
 |---|---|
 |id|Device ID|
@@ -102,11 +104,12 @@ Commands can be scheduled to execute at certain interval.
 ## Supported variable types
 HomeAuto supports basic JSON/JavaScript types:
 
-|Type|Textual representation|Similar types|
-|---|---|---|
-|String|"string"|String(Java, C#, Kotlin, etc.), char*(C)|
-|Number|"number"|Double(Java, C#, Kotlin, etc.)|
-|Boolean|"boolean"|Bool/Boolean|
+|Type|Textual representation|Similar types|Description|
+|---|---|---|---|
+|String|"string"|String(Java, C#, Kotlin, etc.), char*(C)|-|
+|Number|"number"|Double(Java, C#, Kotlin, etc.)|-|
+|Boolean|"boolean"|Bool/Boolean|-|
+|Void|"void"|void, Unit, etc.|Used in returnType when function doesn't return anything|
 
 - There may be support for more specific primitives later(int, short, byte, etc.).
 
