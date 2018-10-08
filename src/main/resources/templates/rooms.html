@@ -9,5 +9,9 @@
 <body>
     <div th:replace="fragments/header"></div>
     <h1>Rooms</h1>
+    <tr th:each="room : ${rooms}">
+        <td th:text="${room.name}"></td>
+        <td th:text="${room.type}"></td>
+    </tr>
 </body>
 </html>
