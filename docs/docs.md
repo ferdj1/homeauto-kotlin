@@ -73,6 +73,7 @@ User defines which device and command is observed and which device and command w
 
 |Attribute|Description|
 |---|---|
+|id|Unique ID of the subscription|
 |observedDeviceId|ID of the device that is observed|
 |observedCommandId|ID of the command that is observed|
 |observerList|Array that holds observers|
@@ -95,6 +96,7 @@ Commands can be scheduled to execute at certain interval.
 
 |Attribute|Description|
 |---|---|
+|id|Unique ID of the scheduled command|
 |deviceId|Device ID|
 |commandId|Command ID|
 |parameters|Parameters being passed in|
