@@ -112,4 +112,45 @@ HomeAuto supports basic JSON/JavaScript types:
 
 
 # WebSocket Information
-**TODO**
+WebSocket communication will be based on few different message types.
+There are types where device sends its description, where it executes a command, etc.
+
+## From the server's point of view
+These types define messages sent TO a server. Server acts based on the message's type
+
+|Message Type|Description|
+|---|---|
+|connected|Device made a connection to the server
+|description|Device sends its description. This will usually be done after connection has been established|
+|clientToServerExecutedCommand|Device signals that a command has been executed. Any device that is interested in that will be notified by the server|
+|disconnected|Device has disconnected from the server|
+
+## From the client's point of view
+These types define messages sent FROM a server to a client.
+Manufacturer needs to define what will happen internally on the device's system.
+There are few message types and actions that should happen when client receives them.
+Rules are loosely defined through a description, there is no interface or anything similar that defines exactly what should happen.
+This allows the client to write its program in any language that supports WebSockets and that can execute functions based on reflection.
+
+|Message Type|Description|
+|---|---|
+|connected|Device needs to send 'description.json' file to a server. Message type used to send description is 'description'(See: "From the server's point of view")|
+|executeCommand|Device needs to execute a command that is defined in this message. After that, it needs to send 'clientToServerExecutedCommand' to notify the server and other devices that it has executed a command internally|
+|serverToClientExecutedCommand|When some device has executed a command, server will notify every subscribed device using this message|
+
+
+# Other
+
+## Other information about WebSockets
+There was a helper message type in earlier version of the project that handles information about the device being displayed on their page.
+This needs better implementation because current solution is clumsy and kind of hacky.
+
+## Ideas about the communication
+
+Interfaces could be implemented on the client side that would force exact behaviour.
+Doing that would limit flexibility on the client side.
+
+## Bootstrapping
+
+Task: find a way for the device to easily connect to server's network and server itself.
+ 
