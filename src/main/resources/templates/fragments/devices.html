@@ -1,13 +1,12 @@
 <div th:fragment="devices" xmlns:th="http://www.thymeleaf.org/">
-    <!-- TODO: Change variables in whole template when MongoDB is up -->
-    <div th:if="${deviceList.size == 0}" class="alert alert-primary">
+    <div th:if="${devices.size() == 0}" class="alert alert-primary">
         <h4 class="alert-heading">Connect devices</h4>
         <p>There is no devices connected at the moment. Once connected, devices will show up here.</p>
     </div>
 
-    <div th:if="${deviceList.size != 0}">
+    <div th:if="${devices.size() != 0}">
         <h1 class="display-4">Devices</h1>
-        <a th:each="device : ${deviceList}" href="device/" + ${device.id}>
+        <a th:each="device : ${devices}" href="device/" + ${device.id}>
             <div class="card border-primary mb-3" style="max-width: 18rem;">
                 <div class="card-header" th:text="${device.manufacturer}"></div>
                 <div class="card-body text-primary">
