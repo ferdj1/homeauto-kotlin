@@ -2,18 +2,20 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org/">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SmartHome - Error Page</title>
 
     <th:block th:replace="fragments/headBootstrap"></th:block>
 </head>
 <body>
     <div th:replace="fragments/header"></div>
-    <div class="alert alert-danger" role="alert">
-        <h4 class="alert-heading">Something went wrong!</h4>
+    <article class="message is-danger">
+        <div class="message-header">
+            <p>Something went wrong!</p>
+        </div>
         <!-- TODO: Insert custom error message here. Idea 2: Make error/ folder in templates and create error code templates.-->
-        <p>Can't find the page.</p>
-
-        <a href="/" class="btn btn-primary">Go home</a>
-    </div>
+        <div class="message-body">Can't find the page.</div>
+        <a href="/" class="button is-primary">Go home</a>
+    </article>
 </body>
 </html>

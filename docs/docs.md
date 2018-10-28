@@ -34,16 +34,26 @@ Device description has array 'commands' that holds commands defined here.
 |parameterTypes|Array of strings that hold the names of the types(e.g. "string" for textual values)|
 |returnType|Defines type of the value that the function returns(See: Supported variable types)|
 
-## ExecutedCommand
+##ExecutableCommand
 JSON that holds information about the command being executed.
 Note that there is no need for parameter types. HomeAuto will read types from the database stored on the system.
- 
 
 |Attributes|Description|
 |---|---|
-|deviceId|ID of the device that executed the command|
+|deviceId|ID of the device that will execute command|
 |commandId|ID of the command that will be executed on the device|
-|parameters|Parameters that are passed in|
+|parameters|Parameters that are passed in| 
+
+## ExecutedCommand
+JSON that holds information about the command that was executed and result of it.
+
+|Attributes|Description|
+|---|---|
+|deviceId|ID of the device that executed command|
+|commandId|ID of the command that was executed|
+|result|Result of the execution|
+
+
 
 ## Scenes (DB)
 Scene holds information about the commands that should be executed together.
@@ -125,10 +135,8 @@ These types define messages sent TO a server. Server acts based on the message's
 
 |Message Type|Description|
 |---|---|
-|connected|Device made a connection to the server
 |description|Device sends its description. This will usually be done after connection has been established|
 |clientToServerExecutedCommand|Device signals that a command has been executed. Any device that is interested in that will be notified by the server|
-|disconnected|Device has disconnected from the server|
 
 ## From the client's point of view
 These types define messages sent FROM a server to a client.
@@ -139,7 +147,6 @@ This allows the client to write its program in any language that supports WebSoc
 
 |Message Type|Description|
 |---|---|
-|connected|Device needs to send 'description.json' file to a server. Message type used to send description is 'description'(See: "From the server's point of view")|
 |executeCommand|Device needs to execute a command that is defined in this message. After that, it needs to send 'clientToServerExecutedCommand' to notify the server and other devices that it has executed a command internally|
 |serverToClientExecutedCommand|When some device has executed a command, server will notify every subscribed device using this message|
 

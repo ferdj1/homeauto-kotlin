@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service
 
 interface DeviceService {
     fun findAll(): List<DeviceDescription>
+    fun existsById(id: String): Boolean
+    fun add(device: DeviceDescription): DeviceDescription
 }
 
 @Service("deviceService")
@@ -16,5 +18,8 @@ class DeviceServiceImpl : DeviceService {
 
     override fun findAll(): List<DeviceDescription> = deviceRepository.findAll()
 
+    override fun existsById(id: String) = deviceRepository.existsById(id)
+
+    override fun add(device: DeviceDescription) = deviceRepository.save(device)
 
 }

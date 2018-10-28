@@ -2,12 +2,30 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org/">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SmartHome - Scheduler</title>
 
     <th:block th:replace="fragments/headBootstrap"></th:block>
 </head>
 <body>
-    <div th:replace="fragments/header"></div>
-    <h1>Scheduler</h1>
+<div th:replace="fragments/header"></div>
+<div class="columns">
+    <div th:replace="fragments/sidebar"></div>
+    <div class="column is-paddingless">
+        <!-- Heading of the scheduler -->
+        <section class="hero is-primary">
+            <div class="hero-body">
+                <div class="container">
+                    <h1 class="title">
+                        Scheduler
+                    </h1>
+                    <h2 class="subtitle">
+                        Here you can let your devices execute operations at certain intervals.
+                    </h2>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
 </body>
 </html>

@@ -1,6 +1,7 @@
 package ferdj1.projects.homeauto.controllers
 
 import ferdj1.projects.homeauto.services.RoomService
+import ferdj1.projects.homeauto.websocket.CommunicationHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model

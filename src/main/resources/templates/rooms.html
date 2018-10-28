@@ -2,16 +2,119 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org/">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SmartHome - Rooms</title>
 
     <th:block th:replace="fragments/headBootstrap"></th:block>
 </head>
 <body>
-    <div th:replace="fragments/header"></div>
-    <h1>Rooms</h1>
-    <tr th:each="room : ${rooms}">
-        <td th:text="${room.name}"></td>
-        <td th:text="${room.type}"></td>
-    </tr>
+<div th:replace="fragments/header"></div>
+<div class="columns">
+    <div th:replace="fragments/sidebar"></div>
+    <div class="column is-paddingless">
+        <!-- Heading of the rooms -->
+        <section class="hero is-primary">
+            <div class="hero-body">
+                <div class="container">
+                    <h1 class="title">
+                        Rooms
+                    </h1>
+                    <h2 class="subtitle">
+                        Group your devices into separate rooms.
+                    </h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Room form -->
+        <div class="container">
+            <form action="/rooms" method="post">
+                <div class="field">
+                    <label class="label">Room name</label>
+                    <div class="control">
+                        <input type="text" placeholder="Room name" class="input" name="roomName">
+                    </div>
+
+                    <label class="label">Room type</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="roomType" id="roomType">
+                                <option>Living room</option>
+                                <option>Bedroom</option>
+                                <option>Kitchen</option>
+                                <option>Bathroom</option>
+                                <option>Hallway</option>
+                                <option>Toilet</option>
+                                <option>Garage</option>
+                                <option>Dining room</option>
+                                <option>Balcony</option>
+                                <option>Garden</option>
+                                <option>Storage room</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <button class="button is-link">Create new room</button>
+                    </div>
+                </div>
+            </form>
+            <hr>
+        </div>
+
+        <!-- Room list -->
+        <div class="container">
+            <h1 class="title">Rooms</h1>
+            <!-- TODO: Do foreach on this div for each room -->
+            <div class="box" th:each="room : ${rooms}">
+                <span class="tag is-warning" th:text="${room.type}"></span>
+                <h2 class="title is-3" th:text="${room.name}"></h2>
+
+                <!-- TODO: Do foreach on this 'a' for each device in the room -->
+                <!-- TODO: Fix href in necessary -->
+                <a href='device/' + device.id>
+                    <div class="notification is-link">
+                        <h2 class="title is-4">
+                            <!-- TODO: Device name -->
+                        </h2>
+
+                        <h3 class="subtitle is-5">
+                            <!-- TODO: Device manufacturer -->
+                        </h3>
+
+                        <!-- TODO: Add info that says if device is currently connected -->
+
+                        <!-- TODO: Add form action -->
+                        <form action="" method="post">
+                            <!-- TODO: Add value to input -->
+                            <input type="hidden" name="deviceId">
+                            <button class="button is-danger is-small is-inverted is-pulled-right">Delete device</button>
+                        </form>
+                        <br>
+                    </div>
+                </a>
+
+                <!-- TODO: Add action to form -->
+                <form action="" method="post">
+                    <div class="field">
+                        <div class="control">
+                            <!-- TODO: Add value to input -->
+                            <input type="hidden" name="roomName">
+                        </div>
+                        <label class="label">Add device to room</label>
+                        <div class="control">
+                            <div class="select">
+                                <!-- TODO: Add list of devices, use script -->
+                            </div>
+                        </div>
+                        <div class="control">
+                            <button class="button is-link">Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
 </body>
 </html>

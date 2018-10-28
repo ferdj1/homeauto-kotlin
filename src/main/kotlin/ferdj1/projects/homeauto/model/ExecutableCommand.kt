@@ -2,7 +2,7 @@ package ferdj1.projects.homeauto.model
 
 import org.springframework.data.annotation.TypeAlias
 
-@TypeAlias("executedCommand")
-data class ExecutedCommand(val deviceId: String,
+@TypeAlias("executableCommand")
+data class ExecutableCommand(val deviceId: String,
                            val commandId: String,
-                           val result: String)
+                           val parameters: List<String>)
