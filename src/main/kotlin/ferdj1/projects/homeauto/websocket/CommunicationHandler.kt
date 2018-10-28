@@ -16,7 +16,7 @@ import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import javax.annotation.Resource
 
-@Service
+@Component
 class CommunicationHandler @Autowired constructor(@Autowired val deviceService: DeviceService) : TextWebSocketHandler() {
     // Message type constants
     private val DESCRIPTION_MESSAGE_TYPE = "description"
@@ -24,7 +24,8 @@ class CommunicationHandler @Autowired constructor(@Autowired val deviceService: 
     private val SERVER_TO_CLIENT_EXECUTED_COMMAND_MESSAGE_TYPE = "serverToClientExecutedCommand"
     private val EXECUTE_COMMAND_MESSAGE_TYPE = "executeCommand"
 
-    var sessionMap: MutableMap<String, WebSocketSession> = mutableMapOf()
+    @Resource
+    lateinit var sessionMap: MutableMap<String, WebSocketSession>
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         sessionMap.forEach {

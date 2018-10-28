@@ -8,23 +8,24 @@ import org.springframework.ui.Model
 import org.springframework.ui.set
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.socket.WebSocketSession
+import javax.annotation.Resource
 
 @Controller
 class IndexController {
     @Autowired
     private lateinit var deviceService: DeviceService
 
-    @Autowired
-    private lateinit var communicationHandler: CommunicationHandler
+    @Resource
+    lateinit var sessionMap: MutableMap<String, WebSocketSession>
 
     @GetMapping("/")
     fun getIndex(model: Model): String {
         model["devices"] = deviceService.findAll()
 
         // DBG
-        println("FROM CONTROLLER: ${communicationHandler.sessionMap}")
+        println("FROM CONTROLLER: $sessionMap")
 
-        model["sessions"] = communicationHandler.sessionMap
+        model["sessions"] = sessionMap
         return "index"
     }
 }
