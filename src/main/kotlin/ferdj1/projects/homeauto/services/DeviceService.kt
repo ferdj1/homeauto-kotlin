@@ -4,9 +4,11 @@ import ferdj1.projects.homeauto.model.DeviceDescription
 import ferdj1.projects.homeauto.repositories.DeviceRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
 interface DeviceService {
     fun findAll(): List<DeviceDescription>
+    fun findById(id: String): Optional<DeviceDescription>
     fun existsById(id: String): Boolean
     fun add(device: DeviceDescription): DeviceDescription
 }
@@ -22,4 +24,5 @@ class DeviceServiceImpl : DeviceService {
 
     override fun add(device: DeviceDescription) = deviceRepository.save(device)
 
+    override fun findById(id: String): Optional<DeviceDescription> = deviceRepository.findById(id)
 }

@@ -30,4 +30,6 @@ gradlew.bat
 gradle-wrapper.jar
 gradle-wrapper.properties
 
+frontend/node_modules
+
 todo.txt

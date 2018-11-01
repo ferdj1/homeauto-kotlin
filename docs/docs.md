@@ -32,7 +32,31 @@ Device description has array 'commands' that holds commands defined here.
 |name|Used to display user-friendly name of the command|
 |description|Used to describe more precisely what command does|
 |parameterTypes|Array of strings that hold the names of the types(e.g. "string" for textual values)|
+|parameterDescriptions|Array of ParameterDescription objects. Each one corresponds to a parameter type at the same index|
 |returnType|Defines type of the value that the function returns(See: Supported variable types)|
+
+## ParameterDescription (~DB, Command)
+Used to define limits of what can be passed into the function that command defined.
+This object is useful when system is creating control panel UI for the device.
+Note on min, max and values: Values will be passed in as strings and based on parameter type, casted into the appropriate type.
+
+**TODO**: This will need to be examined further.
+
+|Attribute|Description|
+|---|---|
+|type|Defines whether values being passed into the function can be from a certain set of values, or from a minimum to maximum value, or whatever they want to be(See: Parameter Limit Types)|
+|min|Defines minimum value in string. If there is no minimum value, it must be set to null.| 
+|max|Defines maximum value in string. If there is no maximum value, it must be set to null.|
+|values|Array that holds every allowed value that can be passed into the function| 
+
+### Parameter Limit Types
+These define what are the limits to the values being passed in to the function.
+
+|Attribute|Description|
+|---|---|
+|NO_LIMIT|Value doesn't have limit|
+|LIMITED_SET|Value must be from a set of values defined in ParameterDescription's values array|
+|MIN_MAX|Value must be between min and max defined in ParameterDescription|
 
 ##ExecutableCommand
 JSON that holds information about the command being executed.
@@ -121,9 +145,12 @@ HomeAuto supports basic JSON/JavaScript types:
 |String|"string"|String(Java, C#, Kotlin, etc.), char*(C)|-|
 |Number|"number"|Double(Java, C#, Kotlin, etc.)|-|
 |Boolean|"boolean"|Bool/Boolean|-|
+|Null|"null"|null, NULL, 0|Used to represent unused value|
 |Void|"void"|void, Unit, etc.|Used in returnType when function doesn't return anything|
 
 - There may be support for more specific primitives later(int, short, byte, etc.).
+
+
 
 
 # WebSocket Information
