@@ -26,17 +26,16 @@
 
         <!-- Device list -->
         <div class="container" id="deviceList" v-else>
-            <!-- TODO: Fix href if necessary -->
-            <a href="" v-for="device in devices">
+            <router-link :to="'/devices/' + device.id" v-for="device in devices">
                 <div class="box">
-                    <!-- TODO: Insert code that displays whether device is connected or not -->
-                    <span class="tag is-success is-pulled-right">Connected</span>
+                    <span class="tag is-success is-pulled-right" v-if="device.id in sessions">Connected</span>
+                    <span class="tag is-danger is-pulled-right" v-else>Disconnected</span>
                     <h1 class="title is-3">{{device.name}}</h1>
                     <h2 class="subtitle is-5">{{device.manufacturer}}</h2>
                     <hr>
                     <p class="is-5">{{device.type}}</p>
                 </div>
-            </a>
+            </router-link>
         </div>
     </div>
 </template>
@@ -49,6 +48,7 @@
         data() {
             return {
                 devices: null,
+                sessions: null,
                 noDevices: true
             }
         },
@@ -64,12 +64,20 @@
                 }).catch((error) => {
                 console.log(error)
             })
+
+            AXIOS.get('http://localhost:8080/api/websocketsessions')
+                .then((response) => {
+                    console.log(response)
+                    this.sessions = response.data
+                }).catch((error) => {
+                console.log(error)
+            })
         },
         methods: {
-            getRooms() {
+            getDevices() {
                 AXIOS.get('http://localhost:8080/api/devices')
                     .then((response) => {
-                        console.log(response);
+                        console.log(response)
                         this.devices = response.data
                         if(this.devices.length > 0) {
                             console.log(this.devices.length)
@@ -78,7 +86,23 @@
                     }).catch((error) => {
                     console.log(error)
                 })
+            },
+            getSessions() {
+                AXIOS.get('http://localhost:8080/api/websocketsessions')
+                    .then((response) => {
+                        console.log(response)
+                        this.sessions = response.data
+                    }).catch((error) => {
+                    console.log(error)
+                })
             }
+        },
+        mounted: function () {
+            this.getSessions();
+
+            setInterval(() => {
+                this.getSessions();
+            }, 500);
         }
     }
 </script>

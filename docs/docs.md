@@ -31,8 +31,9 @@ Device description has array 'commands' that holds commands defined here.
 |id|Specifies exact command. Used in device's program to execute specific function|
 |name|Used to display user-friendly name of the command|
 |description|Used to describe more precisely what command does|
-|parameterTypes|Array of strings that hold the names of the types(e.g. "string" for textual values)|
-|parameterDescriptions|Array of ParameterDescription objects. Each one corresponds to a parameter type at the same index|
+|getSetType|Used to represent whether command will be used to mutate data in device or will it be used to get data from the device(See: Get-Set Types)|
+|displayText|If 'getSetType' is GET, there needs to be a text that will be displayed next to the received data. This is null if there is no GET type|
+|parameterDescriptions|Array of ParameterDescription objects|
 |returnType|Defines type of the value that the function returns(See: Supported variable types)|
 
 ## ParameterDescription (~DB, Command)
@@ -44,7 +45,9 @@ Note on min, max and values: Values will be passed in as strings and based on pa
 
 |Attribute|Description|
 |---|---|
-|type|Defines whether values being passed into the function can be from a certain set of values, or from a minimum to maximum value, or whatever they want to be(See: Parameter Limit Types)|
+|type|Defines type of the parameter(See: Supported variable types)|
+|limitType|Defines whether values being passed into the function can be from a certain set of values, or from a minimum to maximum value, or whatever they want to be(See: Parameter Limit Types)|
+|specialType|Defines meaning of the value(e.g. color)|
 |min|Defines minimum value in string. If there is no minimum value, it must be set to null.| 
 |max|Defines maximum value in string. If there is no maximum value, it must be set to null.|
 |values|Array that holds every allowed value that can be passed into the function| 
@@ -57,6 +60,14 @@ These define what are the limits to the values being passed in to the function.
 |NO_LIMIT|Value doesn't have limit|
 |LIMITED_SET|Value must be from a set of values defined in ParameterDescription's values array|
 |MIN_MAX|Value must be between min and max defined in ParameterDescription|
+
+### Get-Set Types
+Data can be received from the device and displayed on the system's UI. Other thing that can be done is that data can be sent to device.
+
+|Attribute|Description|
+|---|---|
+|GET|Used to receive data from the device|
+|SET|Used to send data to device|
 
 ##ExecutableCommand
 JSON that holds information about the command being executed.

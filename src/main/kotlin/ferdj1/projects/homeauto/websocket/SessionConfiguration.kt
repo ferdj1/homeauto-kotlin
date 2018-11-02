@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.socket.WebSocketSession
 
 @Component
-class SessionConfig {
+class SessionConfiguration {
     @Bean
-    fun sessionMap(): MutableMap<String, WebSocketSession> = mutableMapOf()
+    fun sessionMap() = HashMap<String, WebSocketSession>()
 }

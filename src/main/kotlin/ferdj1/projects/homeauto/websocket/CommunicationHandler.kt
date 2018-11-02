@@ -17,15 +17,13 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 import javax.annotation.Resource
 
 @Component
-class CommunicationHandler @Autowired constructor(@Autowired val deviceService: DeviceService) : TextWebSocketHandler() {
+class CommunicationHandler @Autowired constructor(@Autowired val deviceService: DeviceService,
+                                                  @Autowired val sessionMap: HashMap<String, WebSocketSession>) : TextWebSocketHandler() {
     // Message type constants
     private val DESCRIPTION_MESSAGE_TYPE = "description"
     private val CLIENT_TO_SERVER_EXECUTED_COMMAND_MESSAGE_TYPE = "clientToServerExecutedCommand"
     private val SERVER_TO_CLIENT_EXECUTED_COMMAND_MESSAGE_TYPE = "serverToClientExecutedCommand"
     private val EXECUTE_COMMAND_MESSAGE_TYPE = "executeCommand"
-
-    @Resource
-    lateinit var sessionMap: MutableMap<String, WebSocketSession>
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         sessionMap.forEach {
