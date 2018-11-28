@@ -15,6 +15,10 @@ export default new Router({
     routes: [
         {
             path: '/',
+            redirect: '/devices'
+        },
+        {
+            path: '/devices',
             name: 'Devices',
             component: Devices
         },

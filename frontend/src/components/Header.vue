@@ -46,5 +46,6 @@
 
     #logoText {
         margin-bottom: 0px;
+        font-family: "Roboto", Arial, sans-serif;
     }
 </style>

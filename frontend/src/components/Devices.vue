@@ -26,6 +26,53 @@
 
         <!-- Device list -->
         <div class="container" id="deviceList" v-else>
+            <div class="columns" id="devicesInfoCards">
+                <div class="column is-one-third">
+                    <div class="card" id="numOfConnectedCard">
+                        <div class="card-header">
+                            <h1 class="card-header-title is-centered title">
+                                {{Object.keys(sessions).length}}
+                            </h1>
+                        </div>
+                        <div class="card-content">
+                            <div class="content">
+                                <h3 class="subtitle has-text-centered"><i class="fas fa-plug"></i> Devices connected</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-one-third">
+                    <div class="card" id="numOfTotalCard">
+                        <div class="card-header">
+                            <h1 class="card-header-title is-centered title">
+                                {{devices.length}}
+                            </h1>
+                        </div>
+                        <div class="card-content">
+                            <div class="content">
+                                <h3 class="subtitle has-text-centered"><i class="fas fa-desktop"></i> Devices total</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-one-third">
+                    <div class="card" id="numOfSomethingCard">
+                        <div class="card-header">
+                            <h1 class="card-header-title is-centered title">
+                                2
+                            </h1>
+                        </div>
+                        <div class="card-content">
+                            <div class="content">
+                                <h3 class="subtitle has-text-centered"></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
             <router-link :to="'/devices/' + device.id" v-for="device in devices">
                 <div class="box">
                     <span class="tag is-success is-pulled-right" v-if="device.id in sessions">Connected</span>
@@ -57,7 +104,7 @@
                 .then((response) => {
                     console.log(response)
                     this.devices = response.data
-                    if(this.devices.length > 0) {
+                    if (this.devices.length > 0) {
                         console.log(this.devices.length)
                         this.noDevices = false
                     }
@@ -79,7 +126,7 @@
                     .then((response) => {
                         console.log(response)
                         this.devices = response.data
-                        if(this.devices.length > 0) {
+                        if (this.devices.length > 0) {
                             console.log(this.devices.length)
                             this.noDevices = false
                         }
@@ -98,22 +145,77 @@
             }
         },
         mounted: function () {
-            this.getSessions();
+            this.getDevices()
+            this.getSessions()
 
             setInterval(() => {
-                this.getSessions();
-            }, 500);
+                this.getDevices()
+                this.getSessions()
+            }, 1000);
         }
     }
 </script>
 
 <style>
+    #devicesRoot {
+        background-color: #ededed;
+        height: 100%;
+    }
+
+    #devicesRoot .box h1 {
+        text-transform: uppercase;
+        font-weight: bolder;
+    }
+
     #noDevicesAlert {
         margin: 30px;
     }
 
-
     #deviceList .box {
         margin-top: 10px;
+    }
+
+    #devicesInfoCards {
+        padding-left: 100px;
+        padding-right: 100px;
+    }
+
+    #devicesInfoCards .card h3 {
+        text-transform: uppercase;
+        font-family: "Roboto Condensed", Arial, sans-serif;
+        margin-bottom: 0;
+    }
+
+    #devicesInfoCards .card h3 i {
+        margin-right: 5px;
+    }
+
+    #numOfConnectedCard .card-header {
+        background: linear-gradient(to bottom, #003056 30%, #004378 100%);
+        padding: 30px;
+    }
+
+    #numOfConnectedCard .card-content {
+        padding: 15px;
+    }
+
+    #devicesInfoCards .card h1 {
+        color: #fff;
+        font-family: "Roboto Condensed", Arial, sans-serif;
+        font-weight: bolder;
+    }
+
+    #numOfTotalCard .card-header {
+        background: linear-gradient(to bottom, #04518c 30%, #045c9f 100%);
+        padding: 30px;
+    }
+
+    #numOfTotalCard .card-content {
+        padding: 15px;
+    }
+
+    #numOfSomethingCard .card-header {
+        background: linear-gradient(to bottom, #00a1d9 30%, #00b7f7 100%);
+        padding: 30px;
     }
 </style>

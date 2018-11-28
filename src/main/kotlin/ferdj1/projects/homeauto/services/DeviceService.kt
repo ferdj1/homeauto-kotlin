@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 interface DeviceService {
-    fun findAll(): List<DeviceDescription>
+    fun findAll(): MutableList<DeviceDescription>
     fun findById(id: String): Optional<DeviceDescription>
     fun existsById(id: String): Boolean
     fun add(device: DeviceDescription): DeviceDescription
@@ -18,7 +18,7 @@ class DeviceServiceImpl : DeviceService {
     @Autowired
     lateinit var deviceRepository: DeviceRepository
 
-    override fun findAll(): List<DeviceDescription> = deviceRepository.findAll()
+    override fun findAll(): MutableList<DeviceDescription> = deviceRepository.findAll()
 
     override fun existsById(id: String) = deviceRepository.existsById(id)
 

@@ -5,4 +5,5 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 interface RoomRepository : MongoRepository<Room, Long> {
     fun deleteByName(name: String)
+    fun findByName(name: String): Room?
 }

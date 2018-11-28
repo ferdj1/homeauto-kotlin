@@ -45,18 +45,21 @@ Note on min, max and values: Values will be passed in as strings and based on pa
 
 |Attribute|Description|
 |---|---|
+|name|Name that describes what parameter does in function(e.g.: If there needs to be a gradient of colors selected, there should be a label for first and second color|
 |type|Defines type of the parameter(See: Supported variable types)|
 |limitType|Defines whether values being passed into the function can be from a certain set of values, or from a minimum to maximum value, or whatever they want to be(See: Parameter Limit Types)|
 |specialType|Defines meaning of the value(e.g. color)|
 |min|Defines minimum value in string. If there is no minimum value, it must be set to null.| 
 |max|Defines maximum value in string. If there is no maximum value, it must be set to null.|
 |values|Array that holds every allowed value that can be passed into the function| 
+|defaultValue|Default value for this parameter|
 
 ### Parameter Limit Types
 These define what are the limits to the values being passed in to the function.
 
 |Attribute|Description|
 |---|---|
+|UNDEFINED|Value cannot be placed in other three categories|
 |NO_LIMIT|Value doesn't have limit|
 |LIMITED_SET|Value must be from a set of values defined in ParameterDescription's values array|
 |MIN_MAX|Value must be between min and max defined in ParameterDescription|
@@ -86,6 +89,7 @@ JSON that holds information about the command that was executed and result of it
 |---|---|
 |deviceId|ID of the device that executed command|
 |commandId|ID of the command that was executed|
+|parameters|Array of arguments that were given to the command|
 |result|Result of the execution|
 
 
@@ -154,14 +158,10 @@ HomeAuto supports basic JSON/JavaScript types:
 |Type|Textual representation|Similar types|Description|
 |---|---|---|---|
 |String|"string"|String(Java, C#, Kotlin, etc.), char*(C)|-|
-|Number|"number"|Double(Java, C#, Kotlin, etc.)|-|
+|Number|"number"|Double(Java, C#, Kotlin, etc.)|See: JavaScript's number format|
+|Integer|"integer"|Integer(Java, C#, Kotlin, etc.) |-|
 |Boolean|"boolean"|Bool/Boolean|-|
 |Null|"null"|null, NULL, 0|Used to represent unused value|
-|Void|"void"|void, Unit, etc.|Used in returnType when function doesn't return anything|
-
-- There may be support for more specific primitives later(int, short, byte, etc.).
-
-
 
 
 # WebSocket Information

@@ -1,6 +1,7 @@
 package ferdj1.projects.homeauto.controllers
 
 import ferdj1.projects.homeauto.model.Room
+import ferdj1.projects.homeauto.services.DeviceService
 import ferdj1.projects.homeauto.services.RoomService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.ui.Model
@@ -12,6 +13,9 @@ class RoomsController {
     @Autowired
     private lateinit var roomService: RoomService
 
+    @Autowired
+    private lateinit var deviceService: DeviceService
+
     @GetMapping("/rooms")
     fun getRooms(model: Model) = roomService.findAll()
 
@@ -21,6 +25,33 @@ class RoomsController {
         return room
     }
 
+    @PostMapping("/rooms/{roomName}/{deviceId}")
+    fun addDeviceToRoom(@PathVariable(value="roomName") roomName: String,
+                        @PathVariable(value="deviceId") deviceId: String): Room? {
+        val room = roomService.findByName(roomName)
+        val device = deviceService.findById(deviceId).get()
+        //Remove this !! asap
+        if(!room?.devices?.contains(device)!!) {
+            room.devices.add(device)
+        }
+
+        roomService.update(room)
+        return roomService.findByName(roomName)
+    }
+
     @DeleteMapping("/rooms/{name}")
     fun deleteRoom(@PathVariable(value="name") name: String) = roomService.deleteByName(name)
+
+    @DeleteMapping("/rooms/{roomName}/{deviceId}")
+    fun deleteDeviceFromRoom(@PathVariable(value="roomName") roomName: String,
+        @PathVariable(value="deviceId") deviceId: String) {
+        val room = roomService.findByName(roomName)
+        val device = deviceService.findById(deviceId).get()
+        //Remove this !! asap
+        if(room?.devices?.contains(device)!!) {
+            room.devices.remove(device)
+        }
+
+        roomService.update(room)
+    }
 }

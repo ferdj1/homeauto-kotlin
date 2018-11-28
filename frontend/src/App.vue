@@ -25,4 +25,5 @@
     @import "../node_modules/bulma/css/bulma.css";
     @import url("https://use.fontawesome.com/releases/v5.4.1/css/all.css");
     @import url("https://fonts.googleapis.com/css?family=Roboto+Condensed");
+    @import url("https://fonts.googleapis.com/css?family=Roboto");
 </style>
