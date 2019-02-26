@@ -16,6 +16,7 @@
     "fecha": "^3.0.0",
     "vue": "^2.5.17",
     "vue-form-generator": "^2.3.2",
+    "vue-native-websocket": "^2.0.12",
     "vue-router": "^3.0.1"
   },
   "devDependencies": {

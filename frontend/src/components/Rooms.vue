@@ -171,7 +171,8 @@
                                     </div>
 
                                     <div class="control">
-                                        <button class="button is-success" id="addDevice" v-on:click="roomSettingsShown = !roomSettingsShown">
+                                        <button class="button is-success" id="addDevice"
+                                                v-on:click="roomSettingsShown = !roomSettingsShown">
                                             Add device
                                         </button>
                                     </div>
@@ -182,7 +183,8 @@
                                     <label class="label">Remove device:</label>
                                     <div class="control">
                                         <div class="select">
-                                            <select name="deleteDeviceId" id="deleteDeviceId" v-model="deleteDeviceId" v-if="currentRoomSettings != null">
+                                            <select name="deleteDeviceId" id="deleteDeviceId" v-model="deleteDeviceId"
+                                                    v-if="currentRoomSettings != null">
                                                 <option v-for="device in currentRoomSettings.devices">
                                                     {{device.id}}
                                                 </option>
@@ -191,7 +193,8 @@
                                     </div>
 
                                     <div class="control">
-                                        <button class="button is-danger" id="deleteDevice" v-on:click="roomSettingsShown = !roomSettingsShown">
+                                        <button class="button is-danger" id="deleteDevice"
+                                                v-on:click="roomSettingsShown = !roomSettingsShown">
                                             Remove device
                                         </button>
                                     </div>
@@ -236,15 +239,28 @@
             }
         },
         computed: {
-              freeDevices: function () {
-                  let takenDevicesList = []
-                  this.rooms.forEach((room) => {
-                      takenDevicesList.push(...room.devices)
-                  })
-                  return this.devices.filter(device => !takenDevicesList.find(dev => device.id === dev.id))
-              }
+            freeDevices: function () {
+                let takenDevicesList = []
+                this.rooms.forEach((room) => {
+                    takenDevicesList.push(...room.devices)
+                })
+                if (this.devices !== null) {
+                    return this.devices.filter(device => !takenDevicesList.find(dev => device.id === dev.id))
+                }
+            }
         },
         created: function () {
+            this.$options.sockets.onopen = (event) => {
+                console.log('Listening to changes from backend(Rooms.vue)...')
+            }
+
+            this.$options.sockets.onmessage = (event) => {
+                var json = JSON.parse(event.data)
+                if (json.status === 'OK' && json.type === 'roomsChange') {
+                    this.getRooms()
+                }
+            }
+
             this.getRooms()
             this.getDevices()
         },
@@ -353,9 +369,9 @@
         mounted: function () {
             this.getRooms()
 
-            setInterval(() => {
+            /*setInterval(() => {
                 this.getRooms()
-            }, 1000)
+            }, 1000)*/
         }
     }
 </script>
@@ -366,7 +382,8 @@
     }
 
     #roomsRoot {
-        margin-bottom: 20px;
+        padding-bottom: 20px;
+        background-color: #ededed;
     }
 
     .hero {

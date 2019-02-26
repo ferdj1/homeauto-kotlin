@@ -27,10 +27,10 @@
         <!-- Device list -->
         <div class="container" id="deviceList" v-else>
             <div class="columns" id="devicesInfoCards">
-                <div class="column is-one-third">
+                <div class="column is-half">
                     <div class="card" id="numOfConnectedCard">
                         <div class="card-header">
-                            <h1 class="card-header-title is-centered title">
+                            <h1 class="card-header-title is-centered title" v-if="sessions !== null && sessions !== undefined">
                                 {{Object.keys(sessions).length}}
                             </h1>
                         </div>
@@ -41,7 +41,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="column is-one-third">
+                <div class="column is-half">
                     <div class="card" id="numOfTotalCard">
                         <div class="card-header">
                             <h1 class="card-header-title is-centered title">
@@ -55,27 +55,11 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="column is-one-third">
-                    <div class="card" id="numOfSomethingCard">
-                        <div class="card-header">
-                            <h1 class="card-header-title is-centered title">
-                                2
-                            </h1>
-                        </div>
-                        <div class="card-content">
-                            <div class="content">
-                                <h3 class="subtitle has-text-centered"></h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
             <router-link :to="'/devices/' + device.id" v-for="device in devices">
                 <div class="box">
-                    <span class="tag is-success is-pulled-right" v-if="device.id in sessions">Connected</span>
+                    <span class="tag is-success is-pulled-right" v-if="sessions !== null && device.id in sessions">Connected</span>
                     <span class="tag is-danger is-pulled-right" v-else>Disconnected</span>
                     <h1 class="title is-3">{{device.name}}</h1>
                     <h2 class="subtitle is-5">{{device.manufacturer}}</h2>
@@ -100,25 +84,23 @@
             }
         },
         created: function () {
-            AXIOS.get('http://localhost:8080/api/devices')
-                .then((response) => {
-                    console.log(response)
-                    this.devices = response.data
-                    if (this.devices.length > 0) {
-                        console.log(this.devices.length)
-                        this.noDevices = false
-                    }
-                }).catch((error) => {
-                console.log(error)
-            })
+            this.$options.sockets.onopen = (event) => {
+                console.log('Listening to changes from backend(Devices.vue)...')
+            }
 
-            AXIOS.get('http://localhost:8080/api/websocketsessions')
-                .then((response) => {
-                    console.log(response)
-                    this.sessions = response.data
-                }).catch((error) => {
-                console.log(error)
-            })
+            this.$options.sockets.onmessage = (event) => {
+                var json = JSON.parse(event.data)
+                if (json.status === 'OK'
+                    && (json.type === 'description'
+                        || json.type === 'sessionConnected'
+                        || json.type === 'connectionClosed')) {
+                    this.getDevices()
+                    this.getSessions()
+                }
+            }
+
+            this.getDevices()
+            this.getSessions()
         },
         methods: {
             getDevices() {
@@ -127,7 +109,6 @@
                         console.log(response)
                         this.devices = response.data
                         if (this.devices.length > 0) {
-                            console.log(this.devices.length)
                             this.noDevices = false
                         }
                     }).catch((error) => {
@@ -148,10 +129,10 @@
             this.getDevices()
             this.getSessions()
 
-            setInterval(() => {
+            /*setInterval(() => {
                 this.getDevices()
                 this.getSessions()
-            }, 1000);
+            }, 1000);*/
         }
     }
 </script>

@@ -9,4 +9,5 @@ data class ScheduledCommand(@Id val id: ObjectId,
                             val deviceId: String,
                             val commandId: String,
                             val parameters: List<String>,
-                            val interval: Int)
+                            val interval: Int,
+                            val intervalMetric: String)

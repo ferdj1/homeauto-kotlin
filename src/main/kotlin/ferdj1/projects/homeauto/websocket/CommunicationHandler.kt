@@ -6,6 +6,7 @@ import ferdj1.projects.homeauto.model.DeviceDescription
 import ferdj1.projects.homeauto.model.ExecutableCommand
 import ferdj1.projects.homeauto.model.ExecutedCommand
 import ferdj1.projects.homeauto.services.DeviceService
+import ferdj1.projects.homeauto.services.ScheduledCommandService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
@@ -13,9 +14,16 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.util.*
+import kotlin.concurrent.schedule
 
+
+/**
+ * WebSocket Handler that handles communication between devices and the server(backend)
+ */
 @Component
-class CommunicationHandler @Autowired constructor(@Autowired val deviceService: DeviceService,
+class CommunicationHandler @Autowired constructor(@Autowired val backendToFrontendChangeHandler: BackendToFrontendChangeHandler,
+                                                  @Autowired val scheduledCommandService: ScheduledCommandService,
+                                                  @Autowired val deviceService: DeviceService,
                                                   @Autowired val sessionMap: HashMap<String, WebSocketSession>,
                                                   @Autowired val executedCommands: LinkedList<ExecutedCommand>) : TextWebSocketHandler() {
     // Message type constants
@@ -25,6 +33,10 @@ class CommunicationHandler @Autowired constructor(@Autowired val deviceService: 
     private val EXECUTE_COMMAND_MESSAGE_TYPE = "executeCommand"
 
 
+    // Timers
+    private val timers = mutableListOf<TimerTask>()
+
+
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         sessionMap.forEach {
             if (it.value == session) {
@@ -32,6 +44,7 @@ class CommunicationHandler @Autowired constructor(@Autowired val deviceService: 
                 sessionMap.remove(it.key)
             }
         }
+        backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "connectionClosed", session.toString())
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
@@ -47,7 +60,30 @@ class CommunicationHandler @Autowired constructor(@Autowired val deviceService: 
                 if (!deviceService.existsById(deviceId)) {
                     val device = jacksonObjectMapper().readValue<DeviceDescription>(message.payload)
                     deviceService.add(device)
+                } else {
+                    val device = jacksonObjectMapper().readValue<DeviceDescription>(message.payload)
+                    deviceService.update(device)
                 }
+
+                // Start running scheduled commands
+                val scheduledCommands = scheduledCommandService.findAll()
+                scheduledCommands.forEach {
+                    val periodInMilliseconds: Long = when (it.intervalMetric) {
+                        "seconds" -> it.interval * 1000L
+                        "minutes" -> it.interval * 1000L * 60
+                        "hours" -> it.interval * 1000L * 60 * 60
+                        // Default 60 seconds
+                        else -> 60 * 1000L
+                    }
+
+                    // TODO: Fix duplication bug when device restarts
+                    val timerTask = Timer().schedule(0, periodInMilliseconds) {
+                        val executableCommand = ExecutableCommand(EXECUTE_COMMAND_MESSAGE_TYPE, it.deviceId, it.commandId, it.parameters)
+                        executeCommand(executableCommand)
+                    }
+                }
+                backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "description", deviceId)
+
             }
 
             CLIENT_TO_SERVER_EXECUTED_COMMAND_MESSAGE_TYPE -> {
@@ -56,7 +92,8 @@ class CommunicationHandler @Autowired constructor(@Autowired val deviceService: 
                 val parameters = json["parameters"].map { it.asText() }
                 val result = json["result"]?.asText()
 
-                println("Device $deviceId executed $commandId with parameters $parameters and with result ${result?: "missing"}")
+                println("Device $deviceId executed $commandId with parameters $parameters and with result ${result
+                        ?: "missing"}")
 
                 val sync = Any()
 
@@ -64,6 +101,13 @@ class CommunicationHandler @Autowired constructor(@Autowired val deviceService: 
                     executedCommands.add(ExecutedCommand(null, deviceId, commandId, parameters, result))
                 }
 
+                // Check if frontend is asking for info command
+                val getSetType = deviceService.findById(deviceId).get().commands.find { it.id == commandId }?.getSetType
+                if(getSetType == "GET") {
+                    backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "clientToServerExecutedInfoCommand", deviceId)
+                } else {
+                    backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "clientToServerExecutedCommand", deviceId)
+                }
                 // TODO Alert observers that some client executed a command
                 // Idea: Let observers do whatever they need after the execution and then remove the executed command from the queue
 
@@ -71,7 +115,7 @@ class CommunicationHandler @Autowired constructor(@Autowired val deviceService: 
                 // ....
 
                 //synchronized(sync) {
-                    //executedCommands.poll()
+                  //  executedCommands.poll()
                 //}
             }
         }
@@ -79,6 +123,7 @@ class CommunicationHandler @Autowired constructor(@Autowired val deviceService: 
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
         println("$session connected.")
+        backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "sessionConnected", session.toString())
     }
 
     fun executeCommand(executableCommand: ExecutableCommand) {
@@ -89,5 +134,6 @@ class CommunicationHandler @Autowired constructor(@Autowired val deviceService: 
         synchronized(sessionMap[deviceId] as Any) {
             sessionMap[deviceId]?.sendMessage(TextMessage(executeCommandJSONString))
         }
+        backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "executeCommand", deviceId)
     }
 }

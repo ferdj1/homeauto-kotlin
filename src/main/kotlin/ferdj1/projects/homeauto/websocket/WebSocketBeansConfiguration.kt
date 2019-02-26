@@ -12,6 +12,9 @@ class WebSocketBeansConfiguration {
     fun sessionMap() = HashMap<String, WebSocketSession>()
 
     @Bean
+    fun sessionHolder() = SessionHolder(null)
+
+    @Bean
     fun executedCommands() = LinkedList<ExecutedCommand>()
 
 

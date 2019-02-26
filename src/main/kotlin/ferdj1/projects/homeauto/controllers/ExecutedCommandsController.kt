@@ -15,5 +15,5 @@ class ExecutedCommandsController {
     private lateinit var executedCommands: LinkedList<ExecutedCommand>
 
     @GetMapping("/executedCommands")
-    fun getExecutedCommands() = executedCommands
+    fun getExecutedCommands() = LinkedList<ExecutedCommand>(executedCommands)
 }

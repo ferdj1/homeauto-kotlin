@@ -80,7 +80,7 @@ Note that there is no need for parameter types. HomeAuto will read types from th
 |---|---|
 |deviceId|ID of the device that will execute command|
 |commandId|ID of the command that will be executed on the device|
-|parameters|Parameters that are passed in| 
+|parameters|Parameters that are passed in|
 
 ## ExecutedCommand
 JSON that holds information about the command that was executed and result of it.
@@ -150,6 +150,7 @@ Commands can be scheduled to execute at certain interval.
 |commandId|Command ID|
 |parameters|Parameters being passed in|
 |interval|Interval|
+|intervalMetric|Metric used for interval(sec, min, hour)|
 
 
 ## Supported variable types

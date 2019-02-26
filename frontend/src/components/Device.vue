@@ -126,6 +126,23 @@
             }
         },
         created: function () {
+            this.$options.sockets.onopen = (event) => {
+                console.log('Listening to changes from backend(Device.vue)...')
+            }
+
+            this.$options.sockets.onmessage = (event) => {
+                var json = JSON.parse(event.data)
+                if (json.status === 'OK' && (json.type === 'sessionConnected' || json.type === 'connectionClosed')) {
+                    this.getSessions()
+                }
+
+                if (json.status === 'OK' && json.type === 'clientToServerExecutedCommand') {
+                    console.log(json.type)
+                    this.getValueObjects()
+                    this.getSessions()
+                }
+            }
+
             this.getDevice()
             this.getSessions()
 
@@ -135,12 +152,16 @@
             }, 100)
 
             setTimeout(() => {
+                this.getValueObjects()
+            }, 100)
+
+            setTimeout(() => {
                 this.fixFormCSS()
             }, 200)
 
-            setInterval(() => {
+            /*setInterval(() => {
                 this.getValueObjects()
-            }, 10000)
+            }, 10000)*/
 
         },
         methods: {
@@ -186,6 +207,8 @@
 
                         AXIOS.get('http://localhost:8080/api/executedCommands')
                             .then((response) => {
+                                console.log('THIS')
+                                console.log(response.data)
                                 response.data.forEach((executedCommand) => {
                                     if (executedCommand.commandId === command.id) {
                                         this.valuesObjects.push({
@@ -380,8 +403,7 @@
                                         type: "checkbox",
                                         label: parameterDescription.name,
                                         model: parameterDescription.name,
-                                        default: false,
-                                        required: true
+                                        default: false
                                     }
 
                                     schemaObject.fields.push(fieldObject)
@@ -442,9 +464,9 @@
                 this.fixFormCSS();
             }, 50);
 
-            setInterval(() => {
+            /*setInterval(() => {
                 this.getSessions();
-            }, 3000);
+            }, 3000);*/
         }
     }
 </script>

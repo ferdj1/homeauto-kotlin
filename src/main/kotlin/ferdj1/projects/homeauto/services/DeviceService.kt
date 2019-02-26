@@ -11,6 +11,7 @@ interface DeviceService {
     fun findById(id: String): Optional<DeviceDescription>
     fun existsById(id: String): Boolean
     fun add(device: DeviceDescription): DeviceDescription
+    fun update(device: DeviceDescription): DeviceDescription
 }
 
 @Service("deviceService")
@@ -25,4 +26,9 @@ class DeviceServiceImpl : DeviceService {
     override fun add(device: DeviceDescription) = deviceRepository.save(device)
 
     override fun findById(id: String): Optional<DeviceDescription> = deviceRepository.findById(id)
+
+    override fun update(device: DeviceDescription): DeviceDescription {
+        val oldDeviceDescription = findById(device.id).get()
+        return deviceRepository.save(device)
+    }
 }

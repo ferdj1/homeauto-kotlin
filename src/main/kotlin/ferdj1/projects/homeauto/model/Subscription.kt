@@ -8,5 +8,5 @@ import org.springframework.data.annotation.TypeAlias
 data class Subscription(@Id val id: ObjectId,
                         val observedDeviceId: String,
                         val observedCommandId: String,
-                        val observerList: List<Observer>)
+                        val observerList: MutableList<Observer>)
 
