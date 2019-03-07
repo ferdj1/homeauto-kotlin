@@ -132,7 +132,10 @@
 
             this.$options.sockets.onmessage = (event) => {
                 var json = JSON.parse(event.data)
-                if (json.status === 'OK' && (json.type === 'sessionConnected' || json.type === 'connectionClosed')) {
+                if (json.status === 'OK'
+                    && (json.type === 'sessionConnected'
+                        || json.type === 'connectionClosed'
+                        || json.type === 'description')) {
                     this.getSessions()
                 }
 
@@ -361,9 +364,14 @@
 
                             case 'NO_LIMIT':
                                 if (parameterDescription.type === 'string') {
+                                    let inputType = parameterDescription.specialType
+                                    if(inputType === null) {
+                                        inputType = "text"
+                                    }
+
                                     let fieldObject = {
                                         type: "input",
-                                        inputType: "text",
+                                        inputType: inputType,
                                         label: parameterDescription.name,
                                         model: parameterDescription.name,
                                         validator: validators.string,

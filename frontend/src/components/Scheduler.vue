@@ -194,8 +194,6 @@
         },
         methods: {
             deleteScheduledCommand(scheduledCommand) {
-                console.log('THIS')
-                console.log(JSON.stringify(scheduledCommand))
                 AXIOS.delete('http://localhost:8080/api/scheduledCommands/', {data: scheduledCommand}).then((response) => {
                     this.getScheduledCommands()
                     console.log(response)
@@ -323,9 +321,14 @@
 
                         case 'NO_LIMIT':
                             if (parameterDescription.type === 'string') {
+                                let inputType = parameterDescription.specialType
+                                if(inputType === null) {
+                                    inputType = "text"
+                                }
+
                                 let fieldObject = {
                                     type: "input",
-                                    inputType: "text",
+                                    inputType: inputType,
                                     label: parameterDescription.name,
                                     model: parameterDescription.name,
                                     validator: validators.string,

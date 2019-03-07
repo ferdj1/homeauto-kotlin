@@ -6,6 +6,8 @@ import ferdj1.projects.homeauto.model.Parameter
 import ferdj1.projects.homeauto.model.ParameterComparator
 import ferdj1.projects.homeauto.model.Subscription
 import ferdj1.projects.homeauto.services.SubscriptionService
+import ferdj1.projects.homeauto.websocket.BackendToFrontendChangeHandler
+import ferdj1.projects.homeauto.websocket.NotificationStatus
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -15,6 +17,9 @@ import org.springframework.web.bind.annotation.*
 class SubscriptionsController {
     @Autowired
     private lateinit var subscriptionService: SubscriptionService
+
+    @Autowired
+    private lateinit var backendToFrontendChangeHandler: BackendToFrontendChangeHandler
 
     @GetMapping("/subscriptions")
     fun getSubscriptions() = subscriptionService.findAll()
@@ -52,5 +57,24 @@ class SubscriptionsController {
 
             subscriptionService.add(newSubscription)
         }
+        backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "subscriptionsChange", null)
+    }
+
+    @DeleteMapping("/subscriptions")
+    fun deleteSubscription(@RequestBody subscription: Subscription) {
+        backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "subscriptionsChange", null)
+        subscriptionService.delete(subscription)
+    }
+
+    @DeleteMapping("/subscriptions/observers")
+    fun deleteObserver(@RequestBody observerBody: String) {
+        val rootNode = jacksonObjectMapper().readTree(observerBody)
+        val subscription = jacksonObjectMapper().treeToValue(rootNode["subscription"], Subscription::class.java)
+        val observer = jacksonObjectMapper().treeToValue(rootNode["observer"], Observer::class.java)
+
+        subscription.observerList.remove(observer)
+
+        subscriptionService.update(subscription)
+        backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "subscriptionsChange", null)
     }
 }

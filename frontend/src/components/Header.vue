@@ -12,14 +12,12 @@
                 <div class="navbar-end">
                     <div class="level">
                         <div class="navbar-item">
-                            <p class="is-6 has-text-white">
-                                Signed in as: Mark Smith
-                            </p>
                         </div>
                         <div class="navbar-item">
-                            <a class="button is-warning">
-                                Log out
-                            </a>
+                            <!--<button class="button is-warning" v-on:click="getDevices">-->
+                                <!--<i class="fas fa-sync-alt" id="update-button-icon"></i>-->
+                                <!--<span id="update-button-text" class="is-marginless">Check device updates</span>-->
+                            <!--</button>-->
                         </div>
                     </div>
                 </div>
@@ -30,7 +28,14 @@
 
 <script>
     export default {
-        name: 'Header'
+        name: 'Header',
+        data() {
+            return {
+                devices: []
+            }
+        },
+        methods: {
+        }
     }
 </script>
 
@@ -47,5 +52,13 @@
     #logoText {
         margin-bottom: 0px;
         font-family: "Roboto", Arial, sans-serif;
+    }
+
+    #update-button-icon {
+        margin-right: 5px;
+    }
+
+    #update-button-text {
+        font-weight: bold;
     }
 </style>

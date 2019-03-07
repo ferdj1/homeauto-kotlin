@@ -41,14 +41,12 @@ Used to define limits of what can be passed into the function that command defin
 This object is useful when system is creating control panel UI for the device.
 Note on min, max and values: Values will be passed in as strings and based on parameter type, casted into the appropriate type.
 
-**TODO**: This will need to be examined further.
-
 |Attribute|Description|
 |---|---|
 |name|Name that describes what parameter does in function(e.g.: If there needs to be a gradient of colors selected, there should be a label for first and second color|
 |type|Defines type of the parameter(See: Supported variable types)|
-|limitType|Defines whether values being passed into the function can be from a certain set of values, or from a minimum to maximum value, or whatever they want to be(See: Parameter Limit Types)|
 |specialType|Defines meaning of the value(e.g. color)|
+|limitType|Defines whether values being passed into the function can be from a certain set of values, or from a minimum to maximum value, or whatever they want to be(See: Parameter Limit Types)|
 |min|Defines minimum value in string. If there is no minimum value, it must be set to null.| 
 |max|Defines maximum value in string. If there is no maximum value, it must be set to null.|
 |values|Array that holds every allowed value that can be passed into the function| 
@@ -115,6 +113,7 @@ User can add different devices to a room where he can have an organized view.
 |id|Unique ID of the room|
 |name|Room's name that the user has defined|
 |type|Type of the room(kitchen, living room, bathroom, etc.)|
+|devices|List of devices in the room|
 
 ## Subscriptions (DB)
 Each device can listen to commands executed by the other device and based on their output execute their own commands.
@@ -134,7 +133,20 @@ JSON object with information about the observer.
 |Attribute|Description|
 |---|---|
 |observerDeviceId|ID of the observer device|
-|executedCommandId|ID of the command that will be executed|
+|observerCommandId|ID of the command that will be executed|
+|parameters|Parameters that will be given to the command during execution (See: Parameter)|
+|parameterComparators|User-defined checks for observed command (See: ParameterComparator)|
+
+### Parameter(~DB, Subscriptions)
+|Attribute|Description|
+|---|---|
+|usesObservedValue|Boolean value that says if some value from observed command should be used|
+|value|String value that will be parsed into the needed type. This value is defined by the user, if usesObservedValue if false, this value is passed to the command|
+|observedParameterIndex|If usesObservedValue is true, parameter from observed command at specified index will be used instead of previously defined 'value'|
+
+### ParameterComparator(~DB, Subscriptions)
+|Attribute|Description|
+|---|---|
 |useOption|Boolean value that says whether comparison should be done|
 |optionType|Holds the type of the comparison(numbers can be compared in many ways, string can be done in one, and booleans can either be true or false)|
 |sign|Comparison sign(LT, GT, EQ, etc.)|
@@ -191,16 +203,6 @@ This allows the client to write its program in any language that supports WebSoc
 
 
 # Other
-
-## Other information about WebSockets
-There was a helper message type in earlier version of the project that handles information about the device being displayed on their page.
-This needs better implementation because current solution is clumsy and kind of hacky.
-
-## Ideas about the communication
-
-Interfaces could be implemented on the client side that would force exact behaviour.
-Doing that would limit flexibility on the client side.
-
 ## Bootstrapping
 
 Task: find a way for the device to easily connect to server's network and server itself.

@@ -241,6 +241,72 @@
                 </div>
             </div>
             <hr>
+            <div class="section" id="subscriptions">
+                <div id="subscriptionsLeftBorder"></div>
+                <h1 class="title">Subscriptions</h1>
+
+                <div class="box" v-for="subscription in subscriptions">
+                    <div class="control">
+                        <button class="button is-danger is-small is-pulled-right"
+                                v-on:click="deleteSubscription(subscription)">
+                            <i class="fas fa-times"></i> <span class="delete-button-text">Remove subscription</span>
+                        </button>
+                    </div>
+                    <div id="observedCommandLeftBorder"></div>
+                    <h1 class="title is-5">Observed command</h1>
+                    <div class="tag is-medium">{{getDeviceById(subscription.observedDeviceId).name}}</div>
+                    <h1 class="title is-3">{{getCommandByIds(subscription.observedDeviceId,
+                        subscription.observedCommandId).name}}</h1>
+                    <h1 class="subtitle is-6">{{getCommandByIds(subscription.observedDeviceId,
+                        subscription.observedCommandId).description}}</h1>
+                    <hr>
+                    <div id="observersLeftBorder"></div>
+                    <h1 class="title is-5">Observers</h1>
+                    <div class="notification" v-for="observer in subscription.observerList">
+                        <div class="control">
+                            <button class="button is-warning is-small is-pulled-right"
+                                    v-on:click="deleteObserver(subscription, observer)">
+                                <i class="fas fa-times"></i> <span class="delete-button-text">Remove</span>
+                            </button>
+                        </div>
+                        <div class="tag is-medium is-dark">{{getDeviceById(observer.observerDeviceId).name}}</div>
+                        <h1 class="title is-3">{{getCommandByIds(observer.observerDeviceId,
+                            observer.observerCommandId).name}}</h1>
+                        <h1 class="subtitle is-6">{{getCommandByIds(observer.observerDeviceId,
+                            observer.observerCommandId).description}}</h1>
+
+
+                        <div class="columns">
+                            <div class="column">
+                                <div id="descParametersLeftBorder"></div>
+                                <h1 class="title is-5 observer-parameters-title">Parameters <span
+                                        v-if="(observer.parameters.length === 0)">: None</span></h1>
+                                <h1 class="subtitle is-6" v-for="(parameter, index) in observer.parameters">
+                                    {{getCommandByIds(observer.observerDeviceId,
+                                    observer.observerCommandId).parameterDescriptions[index].name}}:
+                                    {{!parameter.usesObservedValue ? parameter.value :
+                                    getCommandByIds(subscription.observedDeviceId,
+                                    subscription.observedCommandId).parameterDescriptions[parameter.observedParameterIndex].name}}
+                                </h1>
+                            </div>
+                            <div class="column">
+                                <div id="descConditionsLeftBorder"></div>
+                                <h1 class="title is-5 observer-parameters-title">Conditions <span
+                                        v-if="(Object.values(observer.parameterComparators).every(item => item.useOption === false))">: None</span>
+                                </h1>
+                                <div v-for="(parameterComparator, index) in observer.parameterComparators">
+                                    <h1 class="subtitle is-6" v-if="parameterComparator.useOption === true">
+                                        {{getCommandByIds(subscription.observedDeviceId,
+                                        subscription.observedCommandId).parameterDescriptions[index].name}} is
+                                        {{convertComparisonCodeToText(parameterComparator.sign)}}
+                                        {{parameterComparator.comparedValue}}
+                                    </h1>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -335,6 +401,54 @@
                     }).catch((error) => {
                     console.log(error)
                 })
+            },
+
+            getCommandByIds(deviceId, commandId) {
+                let device = this.getDeviceById(deviceId)
+                return device.commands.find(command => command.id === commandId)
+            },
+            getDeviceById(deviceId) {
+                return this.devices.find(device => device.id === deviceId)
+            },
+
+            deleteSubscription(subscription) {
+                AXIOS.delete('http://localhost:8080/api/subscriptions/', {data: subscription}).then((response) => {
+                    this.getSubscriptions()
+                    console.log(response)
+                }).catch((error) => {
+                    console.log(error)
+                })
+            },
+
+            deleteObserver(subscription, observer) {
+                let json = {
+                    subscription: subscription,
+                    observer: observer
+                }
+
+                AXIOS.delete('http://localhost:8080/api/subscriptions/observers', {data: json}).then((response) => {
+                    this.getSubscriptions()
+                    console.log(response)
+                }).catch((error) => {
+                    console.log(error)
+                })
+            },
+
+            convertComparisonCodeToText(code) {
+                switch (code) {
+                    case 'EQ':
+                        return 'equal to'
+                    case 'NE':
+                        return 'not equal to'
+                    case 'LT':
+                        return 'less than'
+                    case 'LE':
+                        return 'less than or equal to'
+                    case 'GT':
+                        return 'greater than'
+                    case 'GE':
+                        return 'greater than or equal to'
+                }
             },
 
             subscribe() {
@@ -612,9 +726,14 @@
 
                         case 'NO_LIMIT':
                             if (parameterDescription.type === 'string') {
+                                let inputType = parameterDescription.specialType
+                                if (inputType === null) {
+                                    inputType = "text"
+                                }
+
                                 let fieldObject = {
                                     type: "input",
-                                    inputType: "text",
+                                    inputType: inputType,
                                     label: parameterDescription.name,
                                     model: index.toString(),
                                     validator: validators.string,
@@ -904,9 +1023,14 @@
 
                         case 'NO_LIMIT':
                             if (parameterDescription.type === 'string') {
+                                let inputType = parameterDescription.specialType
+                                if (inputType === null) {
+                                    inputType = "text"
+                                }
+
                                 let fieldObject = {
                                     type: "input",
-                                    inputType: "text",
+                                    inputType: inputType,
                                     label: parameterDescription.name,
                                     model: index.toString(),
                                     validator: validators.string,
@@ -1210,6 +1334,46 @@
         background-color: #ddbcd6;
         width: 6px;
         height: 27px;
+        margin-right: 5px;
+    }
+
+    #subscriptionsLeftBorder {
+        float: left;
+        background-color: #ddbc1b;
+        width: 12px;
+        height: 36px;
+        margin-right: 10px;
+    }
+
+    #observedCommandLeftBorder {
+        float: left;
+        background-color: #ddd4b2;
+        width: 6px;
+        height: 22px;
+        margin-right: 5px;
+    }
+
+    #observersLeftBorder {
+        float: left;
+        background-color: #ddb2cb;
+        width: 6px;
+        height: 22px;
+        margin-right: 5px;
+    }
+
+    #descParametersLeftBorder {
+        float: left;
+        background-color: #97b3dd;
+        width: 6px;
+        height: 22px;
+        margin-right: 5px;
+    }
+
+    #descConditionsLeftBorder {
+        float: left;
+        background-color: #83ddbe;
+        width: 6px;
+        height: 22px;
         margin-right: 5px;
     }
 

@@ -5,8 +5,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import ferdj1.projects.homeauto.model.DeviceDescription
 import ferdj1.projects.homeauto.model.ExecutableCommand
 import ferdj1.projects.homeauto.model.ExecutedCommand
+import ferdj1.projects.homeauto.model.ScheduledCommand
 import ferdj1.projects.homeauto.services.DeviceService
 import ferdj1.projects.homeauto.services.ScheduledCommandService
+import ferdj1.projects.homeauto.services.SubscriptionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
@@ -14,6 +16,7 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.concurrent.schedule
 
 
@@ -23,27 +26,49 @@ import kotlin.concurrent.schedule
 @Component
 class CommunicationHandler @Autowired constructor(@Autowired val backendToFrontendChangeHandler: BackendToFrontendChangeHandler,
                                                   @Autowired val scheduledCommandService: ScheduledCommandService,
+                                                  @Autowired val subscriptionService: SubscriptionService,
                                                   @Autowired val deviceService: DeviceService,
                                                   @Autowired val sessionMap: HashMap<String, WebSocketSession>,
-                                                  @Autowired val executedCommands: LinkedList<ExecutedCommand>) : TextWebSocketHandler() {
+                                                  @Autowired val executedCommands: LinkedList<ExecutedCommand>,
+                                                  @Autowired val scheduledCommandToTimerTaskMap: HashMap<ScheduledCommand, TimerTask>) : TextWebSocketHandler() {
     // Message type constants
     private val DESCRIPTION_MESSAGE_TYPE = "description"
     private val CLIENT_TO_SERVER_EXECUTED_COMMAND_MESSAGE_TYPE = "clientToServerExecutedCommand"
     private val SERVER_TO_CLIENT_EXECUTED_COMMAND_MESSAGE_TYPE = "serverToClientExecutedCommand"
     private val EXECUTE_COMMAND_MESSAGE_TYPE = "executeCommand"
 
+    // Limits
+    private val EXECUTED_COMMANDS_LIMIT = 1000
 
-    // Timers
-    private val timers = mutableListOf<TimerTask>()
-
+    private val STRING_DATATYPE = "string"
+    private val NUMBER_DATATYPE = "number"
+    private val INTEGER_DATATYPE = "integer"
+    private val BOOLEAN_DATATYPE = "boolean"
+    private val NULL_DATATYPE = "null"
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
+        var disconnectedDeviceId: String? = null
+
+        // Remove device session
         sessionMap.forEach {
             if (it.value == session) {
-                println("${it.key} disconnected.")
-                sessionMap.remove(it.key)
+                disconnectedDeviceId = it.key
+                return@forEach
             }
         }
+
+        println("$disconnectedDeviceId disconnected.")
+        sessionMap.remove(disconnectedDeviceId)
+
+        // Remove timers associated with the device
+        scheduledCommandToTimerTaskMap.filter { it.key.deviceId == disconnectedDeviceId }.forEach {
+            it.value.cancel()
+        }
+        val scheduledCommandToTimerTaskMapCopy = HashMap<ScheduledCommand, TimerTask>()
+                .also { it.putAll(scheduledCommandToTimerTaskMap) }
+        scheduledCommandToTimerTaskMap.clear()
+        scheduledCommandToTimerTaskMap.putAll(scheduledCommandToTimerTaskMapCopy.filter { it.key.deviceId != disconnectedDeviceId })
+
         backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "connectionClosed", session.toString())
     }
 
@@ -67,7 +92,7 @@ class CommunicationHandler @Autowired constructor(@Autowired val backendToFronte
 
                 // Start running scheduled commands
                 val scheduledCommands = scheduledCommandService.findAll()
-                scheduledCommands.forEach {
+                scheduledCommands.filter { it.deviceId == deviceId }.forEach {
                     val periodInMilliseconds: Long = when (it.intervalMetric) {
                         "seconds" -> it.interval * 1000L
                         "minutes" -> it.interval * 1000L * 60
@@ -76,11 +101,17 @@ class CommunicationHandler @Autowired constructor(@Autowired val backendToFronte
                         else -> 60 * 1000L
                     }
 
-                    // TODO: Fix duplication bug when device restarts
-                    val timerTask = Timer().schedule(0, periodInMilliseconds) {
+                    Timer().schedule(periodInMilliseconds, periodInMilliseconds) {
                         val executableCommand = ExecutableCommand(EXECUTE_COMMAND_MESSAGE_TYPE, it.deviceId, it.commandId, it.parameters)
                         executeCommand(executableCommand)
+                    }.also { timerTask ->
+                        if (scheduledCommandToTimerTaskMap.containsKey(it)) {
+                            timerTask.cancel()
+                        } else {
+                            scheduledCommandToTimerTaskMap[it] = timerTask
+                        }
                     }
+
                 }
                 backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "description", deviceId)
 
@@ -103,20 +134,110 @@ class CommunicationHandler @Autowired constructor(@Autowired val backendToFronte
 
                 // Check if frontend is asking for info command
                 val getSetType = deviceService.findById(deviceId).get().commands.find { it.id == commandId }?.getSetType
-                if(getSetType == "GET") {
+                if (getSetType == "GET") {
                     backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "clientToServerExecutedInfoCommand", deviceId)
                 } else {
                     backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "clientToServerExecutedCommand", deviceId)
                 }
-                // TODO Alert observers that some client executed a command
-                // Idea: Let observers do whatever they need after the execution and then remove the executed command from the queue
 
-                // For each observer do....
-                // ....
+                val observers = subscriptionService
+                        .findAll()
+                        .find { it.observedDeviceId == deviceId && it.observedCommandId == commandId }?.observerList
 
-                //synchronized(sync) {
-                  //  executedCommands.poll()
-                //}
+                observers?.forEach {
+                    // Parameters for the observer command
+                    val params = it.parameters?.map { parameter ->
+                        if (parameter!!.usesObservedValue) {
+                            if (parameter.observedParameterIndex == -1) {
+                                result
+                            } else {
+                                parameters[parameter.observedParameterIndex!!]
+                            }
+                        } else {
+                            parameter.value
+                        }
+                    }
+
+                    // Conditional
+                    val parameterComparators = it.parameterComparators
+                    val isExecutable = parameterComparators?.filter { pc -> pc?.useOption == true }?.mapIndexed { index, pc ->
+                        when (pc?.sign) {
+                            "EQ" -> {
+                                when (pc.optionType) {
+                                    INTEGER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toInt() == (pc.comparedValue?.toInt())
+                                    NUMBER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toDouble() == (pc.comparedValue?.toDouble())
+                                    STRING_DATATYPE -> return@mapIndexed parameters?.get(index) == (pc.comparedValue)
+                                    BOOLEAN_DATATYPE -> return@mapIndexed parameters?.get(index)?.toBoolean() == (pc.comparedValue?.toBoolean())
+                                    else -> return@mapIndexed false
+                                }
+                            }
+
+                            "NE" -> {
+                                when (pc.optionType) {
+                                    INTEGER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toInt() != (pc.comparedValue?.toInt())
+                                    NUMBER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toDouble() != (pc.comparedValue?.toDouble())
+                                    STRING_DATATYPE -> return@mapIndexed parameters?.get(index) != (pc.comparedValue)
+                                    BOOLEAN_DATATYPE -> return@mapIndexed parameters?.get(index)?.toBoolean() != (pc.comparedValue?.toBoolean())
+                                    else -> return@mapIndexed false
+                                }
+                            }
+
+                            "LT" -> {
+                                when (pc.optionType) {
+                                    INTEGER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toInt()!! < (pc.comparedValue?.toInt()!!)
+                                    NUMBER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toDouble()!! < (pc.comparedValue?.toDouble()!!)
+                                    else -> return@mapIndexed false
+                                }
+                            }
+
+                            "LE" -> {
+                                when (pc.optionType) {
+                                    INTEGER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toInt()!! <= (pc.comparedValue?.toInt()!!)
+                                    NUMBER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toDouble()!! <= (pc.comparedValue?.toDouble()!!)
+                                    else -> return@mapIndexed false
+                                }
+                            }
+
+                            "GT" -> {
+                                when (pc.optionType) {
+                                    INTEGER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toInt()!! > (pc.comparedValue?.toInt()!!)
+                                    NUMBER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toDouble()!! > (pc.comparedValue?.toDouble()!!)
+                                    else -> return@mapIndexed false
+                                }
+                            }
+
+                            "GE" -> {
+                                when (pc.optionType) {
+                                    INTEGER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toInt()!! >= (pc.comparedValue?.toInt()!!)
+                                    NUMBER_DATATYPE -> return@mapIndexed parameters?.get(index)?.toDouble()!! >= (pc.comparedValue?.toDouble()!!)
+                                    else -> return@mapIndexed false
+                                }
+                            }
+
+                            else -> return@mapIndexed false
+                        }
+                    }?.all { b -> b == true }
+
+                    println("IS EXECUTABLE: $isExecutable")
+
+                    if(isExecutable === null) {
+                        return@forEach
+                    }
+
+                    if (isExecutable) {
+                        val executableCommand = ExecutableCommand(EXECUTE_COMMAND_MESSAGE_TYPE,
+                                it.observerDeviceId,
+                                it.observerCommandId,
+                                params)
+                        executeCommand(executableCommand)
+                    }
+                }
+
+                synchronized(sync) {
+                    if (executedCommands.size >= EXECUTED_COMMANDS_LIMIT) {
+                        executedCommands.clear()
+                    }
+                }
             }
         }
     }
@@ -131,9 +252,11 @@ class CommunicationHandler @Autowired constructor(@Autowired val backendToFronte
         val executeCommandJSONString = jacksonObjectMapper().writeValueAsString(executableCommand)
 
         println("Executing command '${executableCommand.commandId}' on device '${executableCommand.deviceId}' with parameters: '${executableCommand.parameters}'")
-        synchronized(sessionMap[deviceId] as Any) {
-            sessionMap[deviceId]?.sendMessage(TextMessage(executeCommandJSONString))
+        if (sessionMap[deviceId] !== null) {
+            synchronized(sessionMap[deviceId] as Any) {
+                sessionMap[deviceId]?.sendMessage(TextMessage(executeCommandJSONString))
+            }
+            backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "executeCommand", deviceId)
         }
-        backendToFrontendChangeHandler.notifyFrontend(NotificationStatus.OK, "executeCommand", deviceId)
     }
 }
