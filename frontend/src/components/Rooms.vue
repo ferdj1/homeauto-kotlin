@@ -126,6 +126,8 @@
                                         <h1 class="card-header-title is-centered subtitle device-card-header-title">
                                             <i class="fas fa-tv" v-if="device.type === 'TV'"></i>
                                             <i class="fas fa-lightbulb" v-if="device.type === 'Lights'"></i>
+                                            <i class="fas fa-burn" v-if="device.type === 'Heating'"></i>
+                                            <i class="fas fa-lock" v-if="device.type === 'Lock'"></i>
                                         </h1>
                                     </div>
                                     <div class="card-content">

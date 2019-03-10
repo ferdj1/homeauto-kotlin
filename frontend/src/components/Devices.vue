@@ -64,7 +64,13 @@
                     <h1 class="title is-3">{{device.name}}</h1>
                     <h2 class="subtitle is-5">{{device.manufacturer}}</h2>
                     <hr>
-                    <p class="is-5">{{device.type}}</p>
+                    <p class="is-5">
+                        <i class="fas fa-tv" v-if="device.type === 'TV'"></i>
+                        <i class="fas fa-lightbulb" v-if="device.type === 'Lights'"></i>
+                        <i class="fas fa-burn" v-if="device.type === 'Heating'"></i>
+                        <i class="fas fa-lock" v-if="device.type === 'Lock'"></i>
+                        <span id="device-type">{{device.type}}</span>
+                    </p>
                 </div>
             </router-link>
         </div>
@@ -198,5 +204,10 @@
     #numOfSomethingCard .card-header {
         background: linear-gradient(to bottom, #00a1d9 30%, #00b7f7 100%);
         padding: 30px;
+    }
+
+    #device-type {
+        margin-left: 5px;
+        font-weight: bold;
     }
 </style>
