@@ -269,7 +269,7 @@
         methods: {
             getRooms() {
                 console.log('Loading rooms...')
-                AXIOS.get('http://localhost:8080/api/rooms')
+                AXIOS.get('http://192.168.100.54:8080/api/rooms')
                     .then((response) => {
                         console.log(response)
                         this.rooms = response.data
@@ -279,7 +279,7 @@
             },
             getDevices() {
                 console.log('Loading devices...')
-                AXIOS.get('http://localhost:8080/api/devices')
+                AXIOS.get('http://192.168.100.54:8080/api/devices')
                     .then((response) => {
                         console.log(response)
                         this.devices = response.data
@@ -313,7 +313,7 @@
                     return
                 }
 
-                AXIOS.post('http://localhost:8080/api/rooms',
+                AXIOS.post('http://192.168.100.54:8080/api/rooms',
                     {
                         "name": this.roomName,
                         "type": this.roomType
@@ -332,7 +332,7 @@
 
             },
             deleteRoom() {
-                AXIOS.delete('http://localhost:8080/api/rooms/' + this.deleteSelectedRoom).then((response) => {
+                AXIOS.delete('http://192.168.100.54:8080/api/rooms/' + this.deleteSelectedRoom).then((response) => {
                     this.getRooms()
                     console.log(response)
                 }).catch((error) => {
@@ -353,14 +353,14 @@
                 this.roomSettingsShown = true
             },
             addDeviceToRoom() {
-                AXIOS.post('http://localhost:8080/api/rooms/' + this.currentRoomSettings.name + '/' + this.addDeviceId).then((response) => {
+                AXIOS.post('http://192.168.100.54:8080/api/rooms/' + this.currentRoomSettings.name + '/' + this.addDeviceId).then((response) => {
                     console.log('Adding device ' + this.addDeviceId + ' to room ' + this.currentRoomSettings.name)
                 }).catch((error) => {
                     console.log(error)
                 })
             },
             deleteDeviceFromRoom() {
-                AXIOS.delete('http://localhost:8080/api/rooms/' + this.currentRoomSettings.name + '/' + this.deleteDeviceId).then((response) => {
+                AXIOS.delete('http://192.168.100.54:8080/api/rooms/' + this.currentRoomSettings.name + '/' + this.deleteDeviceId).then((response) => {
                     this.getRooms()
                     console.log(response)
                 }).catch((error) => {

@@ -384,7 +384,7 @@
         },
         methods: {
             getDevices() {
-                AXIOS.get('http://localhost:8080/api/devices')
+                AXIOS.get('http://192.168.100.54:8080/api/devices')
                     .then((response) => {
                         console.log(response)
                         this.devices = response.data
@@ -394,7 +394,7 @@
             },
 
             getSubscriptions() {
-                AXIOS.get('http://localhost:8080/api/subscriptions')
+                AXIOS.get('http://192.168.100.54:8080/api/subscriptions')
                     .then((response) => {
                         console.log(response)
                         this.subscriptions = response.data
@@ -412,7 +412,7 @@
             },
 
             deleteSubscription(subscription) {
-                AXIOS.delete('http://localhost:8080/api/subscriptions/', {data: subscription}).then((response) => {
+                AXIOS.delete('http://192.168.100.54:8080/api/subscriptions/', {data: subscription}).then((response) => {
                     this.getSubscriptions()
                     console.log(response)
                 }).catch((error) => {
@@ -426,7 +426,7 @@
                     observer: observer
                 }
 
-                AXIOS.delete('http://localhost:8080/api/subscriptions/observers', {data: json}).then((response) => {
+                AXIOS.delete('http://192.168.100.54:8080/api/subscriptions/observers', {data: json}).then((response) => {
                     this.getSubscriptions()
                     console.log(response)
                 }).catch((error) => {
@@ -488,7 +488,7 @@
                     parameterComparators: paramComparators
                 }
 
-                AXIOS.post('http://localhost:8080/api/subscriptions', json).then((response) => {
+                AXIOS.post('http://192.168.100.54:8080/api/subscriptions', json).then((response) => {
                     console.log(response)
                     this.getSubscriptions()
                 }).catch((error) => {

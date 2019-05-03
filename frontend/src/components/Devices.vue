@@ -110,7 +110,7 @@
         },
         methods: {
             getDevices() {
-                AXIOS.get('http://localhost:8080/api/devices')
+                AXIOS.get('http://192.168.100.54:8080/api/devices')
                     .then((response) => {
                         console.log(response)
                         this.devices = response.data
@@ -122,7 +122,7 @@
                 })
             },
             getSessions() {
-                AXIOS.get('http://localhost:8080/api/websocketsessions')
+                AXIOS.get('http://192.168.100.54:8080/api/websocketsessions')
                     .then((response) => {
                         console.log(response)
                         this.sessions = response.data

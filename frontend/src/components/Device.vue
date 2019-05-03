@@ -169,7 +169,7 @@
         },
         methods: {
             getDevice() {
-                let url = 'http://localhost:8080/api/devices/' + this.$route.params.id
+                let url = 'http://192.168.100.54:8080/api/devices/' + this.$route.params.id
 
                 AXIOS.get(url)
                     .then((response) => {
@@ -181,7 +181,7 @@
                 })
             },
             getSessions() {
-                AXIOS.get('http://localhost:8080/api/websocketsessions')
+                AXIOS.get('http://192.168.100.54:8080/api/websocketsessions')
                     .then((response) => {
                         //console.log(response)
                         this.sessions = response.data
@@ -201,14 +201,14 @@
                             "parameters": []
                         }
 
-                        AXIOS.post('http://localhost:8080/api/executeCommand', json)
+                        AXIOS.post('http://192.168.100.54:8080/api/executeCommand', json)
                             .then((response) => {
                                 // Empty
                             }).catch((error) => {
                             console.log(error)
                         })
 
-                        AXIOS.get('http://localhost:8080/api/executedCommands')
+                        AXIOS.get('http://192.168.100.54:8080/api/executedCommands')
                             .then((response) => {
                                 console.log('THIS')
                                 console.log(response.data)
@@ -254,7 +254,7 @@
                     }
                 }
 
-                AXIOS.post('http://localhost:8080/api/executeCommand', json).then((response) => {
+                AXIOS.post('http://192.168.100.54:8080/api/executeCommand', json).then((response) => {
                     console.log(response)
                 }).catch((error) => {
                     console.log(error)

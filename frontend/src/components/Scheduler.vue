@@ -194,7 +194,7 @@
         },
         methods: {
             deleteScheduledCommand(scheduledCommand) {
-                AXIOS.delete('http://localhost:8080/api/scheduledCommands/', {data: scheduledCommand}).then((response) => {
+                AXIOS.delete('http://192.168.100.54:8080/api/scheduledCommands/', {data: scheduledCommand}).then((response) => {
                     this.getScheduledCommands()
                     console.log(response)
                 }).catch((error) => {
@@ -209,7 +209,7 @@
                 return this.devices.find(device => device.id === deviceId)
             },
             getDevices() {
-                AXIOS.get('http://localhost:8080/api/devices')
+                AXIOS.get('http://192.168.100.54:8080/api/devices')
                     .then((response) => {
                         console.log(response)
                         this.devices = response.data
@@ -218,7 +218,7 @@
                 })
             },
             getScheduledCommands() {
-                AXIOS.get('http://localhost:8080/api/scheduledCommands')
+                AXIOS.get('http://192.168.100.54:8080/api/scheduledCommands')
                     .then((response) => {
                         console.log(response)
                         this.scheduledCommands = response.data
@@ -417,7 +417,7 @@
                     "intervalMetric": this.intervalMetric
                 }
 
-                AXIOS.post('http://localhost:8080/api/scheduledCommands', json).then((response) => {
+                AXIOS.post('http://192.168.100.54:8080/api/scheduledCommands', json).then((response) => {
                     console.log(response)
                     this.getScheduledCommands()
                 }).catch((error) => {

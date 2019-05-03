@@ -70,7 +70,7 @@ Data can be received from the device and displayed on the system's UI. Other thi
 |GET|Used to receive data from the device|
 |SET|Used to send data to device|
 
-##ExecutableCommand
+## ExecutableCommand
 JSON that holds information about the command being executed.
 Note that there is no need for parameter types. HomeAuto will read types from the database stored on the system.
 
